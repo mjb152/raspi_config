@@ -34,7 +34,6 @@ sub install_nginx {
 	my ($duser) = @_;
 	print "Installing and configuring nginx, for user $$duser\n";
 	cmd("sudo chown -R $$duser:$$duser /usr/share/nginx/www");
-	exit;
 	cmd("sudo apt-get install nginx");
 	cmd("sudo /etc/init.d/nginx start");
 	cmd("sudo chown -R $$duser:$$duser /usr/share/nginx/www");
@@ -62,7 +61,6 @@ sub cmd {
 	while(<FH>) {
 		print;
 	}
-	
 }
 
 sub prompt {
