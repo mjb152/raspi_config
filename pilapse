@@ -2,8 +2,8 @@
 cd `dirname $0`
 dt=10
 
-ROLL=$(cat /home/martin/pi/roll)
-SAVEDIR=/home/martin/pi/photos
+ROLL=$(cat /home/XX__USER__XX/pi/roll)
+SAVEDIR=/home/XX__USER__XX/pi/photos
 
 for (( j = 0 ; j < 9999999 ; j ++ ))
 do

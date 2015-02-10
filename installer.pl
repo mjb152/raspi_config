@@ -1,6 +1,7 @@
 #!/usr/bin/env perl
 use strict;
 use warnings;
+$|=1;
 
 # script to create a new user environment for a Raspberry Pi
 my $duser = 'pi';	#default user, but it can be replaced if we like
@@ -42,8 +43,14 @@ sub create_user {
 sub install_pilapse {
 	my ($duser) = @_;
 	cmd("sudo mkdir -p /home/$$duser/pilapse/photos");
+	cmd("sudo chown -R $$duser:$$duser /home/$$duser/pilapse");
 	cmd("sudo echo 1 > /home/$$duser/pilapse/roll");
-	cmd("sudo cp pilapse /home/$$duser/pilapse");
+        my $pilapse = slurp('pilapse');
+	$pilapse =~ s/XX__USER__XX/$$duser/g;
+	my $filename = "/home/$$duser/pilapse/pilapse";
+	open(my $fh, '>', $filename) or die "Couldn't open $filename";
+	print $fh $pilapse;
+	close $fh;
 	cmd("sudo chown -R $$duser:$$duser /home/$$duser/pilapse");
 }
 
@@ -84,6 +91,7 @@ sub configure_wifi {
 sub cmd {
 	my ($cmd) = @_;
 
+	print "Issuing command: - $cmd\n";
 	open(FH, "$cmd |") or die "Couldn't execute command $cmd\n";
 	while(<FH>) {
 		print;
