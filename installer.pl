@@ -4,6 +4,14 @@ use warnings;
 
 # script to create a new user environment for a Raspberry Pi
 my $duser = 'pi';	#default user, but it can be replaced if we like
+if ($ARGV[0]) {
+	if (yesno("Would you like to run again as user $ARGV[0] ?")) {
+		$duser = $ARGV[0];
+		print "Proceeding with user set to $duser\n";
+	} else {
+		die "Please run again without supplying arguments\n";
+	}
+}
 
 create_user(\$duser)		if (yesno("Would you like to create a replacement user for \"pi\" ?"));
 configure_wifi()		if (yesno("Would you like to configure WiFi ?"));
@@ -34,8 +42,9 @@ sub create_user {
 sub install_pilapse {
 	my ($duser) = @_;
 	cmd("sudo mkdir -p /home/$$duser/pilapse/photos");
-	cmd("sudo echo -e "1" > /home/$$duser/pilapse/roll");
+	cmd("sudo echo 1 > /home/$$duser/pilapse/roll");
 	cmd("sudo cp pilapse /home/$$duser/pilapse");
+	cmd("sudo chown -R $$duser:$$duser /home/$$duser/pilapse");
 }
 
 sub install_perlbrew {
