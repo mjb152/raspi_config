@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-# Changes to be made ........  wifi goes to /eetc/networks   and wpa_supplicant.conf
+# Changes to be made ........  wifi goes to /etc/networks   and wpa_supplicant.conf
 # script to create a new user environment for a Raspberry Pi
 my $duser = 'pi';	#default user, but it can be replaced if we like
 
@@ -47,11 +47,12 @@ sub configure_wifi {
         my $networks=qq!auto lo\niface lo inet loopback \niface eth0 inet dhcp \n \nallow-hotplug wlan0 \niface wlan0 inet dhcp \nwpa-conf /etc/wpa_supplicant/wpa_supplicant.conf \niface default inet dhcp!;
   	my $ssid = prompt("SSID = : ");
   	my $pass = prompt("PASS = : ");
-        my $wpa1 = qq!ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\nupdate_config=1\n\nnetwork={\nssid="$ssid"\npsk="$pass"\n\n# protocol type can be RSN (for WP2) WPA (for WPA1)\nproto=WPA\n\n!;
-        my $wpa2 = qq!#key management type can be WPA-PSK or WPA-EAP (pre shared or enterprise)\nkey_mgmt=WPA-PSK\n\n#Pairwise can be CCMP or TKIP (for WPA2 or WPA1)\npairwise=TKIP\n\n# Authorization option should be OPEN for both WPA1/WPA2 (less commonly user are SSHARED and LEAP)_\nauth_alg=OPEN\n}!;
-        cmd("sudo echo -e \"$wpa1\" > /home/martin/bb");
-        cmd("sudo echo -e \"$wpa2\" >> /home/martin/bb");
-        #sudo echo -e $NETWORKS > /etc/network/interfaces
+        my $wpa1 = slurp('netinterfaces');
+        my $wpa2 = slurp('netwpa_supplicant.conf');
+	$wpa2 =~ s/XX__SSID__XX/$ssid/;
+	$wpa2 =~ s/XX__PASS__XX/$pass/;
+        cmd("sudo echo -e \"$wpa1\" > /etc/network/interfaces");
+        cmd("sudo echo -e \"$wpa2\" > /etc/wpa_supplicant/wpa_supplicant.conf");
 }
 
 sub cmd {
@@ -75,4 +76,13 @@ sub yesno {
   my ($query) = @_;
   my $answer = prompt("$query (y/n): ");
   return lc($answer) eq 'y';
+}
+
+sub slurp {
+	my ($file) = @_;
+	open my $fh, '<', $file or die;
+	local $/ = undef;
+	my $cont = <$fh>;
+	close $fh;
+	return $cont;
 }
