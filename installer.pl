@@ -6,9 +6,9 @@ use warnings;
 # script to create a new user environment for a Raspberry Pi
 my $duser = 'pi';	#default user, but it can be replaced if we like
 
-create_user(\$duser)	if (prompt_yn("Would you like to create a replacement user for \"pi\" ?"));
-configure_wifi()	if (prompt_yn("Would you like to configure WiFi ?"));
-install_nginx(\$duser)	if (prompt_yn("Would you like to install nginx ?"));
+create_user(\$duser)	if (yesno("Would you like to create a replacement user for \"pi\" ?"));
+configure_wifi()	if (yesno("Would you like to configure WiFi ?"));
+install_nginx(\$duser)	if (yesno("Would you like to install nginx ?"));
 
 
 #------------here be subprocedures--------------------------
@@ -73,31 +73,8 @@ sub prompt {
   return $answer;
 }
 
-sub prompt_yn {
+sub yesno {
   my ($query) = @_;
   my $answer = prompt("$query (y/n): ");
   return lc($answer) eq 'y';
-}
-
-__END__
-function sudoinstall {
-        echo "Checking package status of $1"
-        if [ $(dpkg-query -W -f='${Status}' $1 2>/dev/null | grep -c "ok installed") -eq 0 ];
-        then
-                echo "Not installed ... installing now"
-                sudo apt-get install $1;
-                echo "installation complete"
-        fi
-}
-
-function configure_wifi() {
-        echo -e "Configuring WiFi for first time"
-
-        NETWORKS="auto lo\niface lo inet loopback \niface eth0 inet dhcp \n \nallow-hotplug wlan0 \niface wlan0 inet dhcp \nwpa-conf /etc/wpa_supplicant/wpa_supplicant.conf \niface default inet dhcp"
-        WPA1="ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\nupdate_config=1\n\nnetwork={\nssid=\"Hola Neighbourinos\"\npsk=\"hellomaldon54\"\n\n# protocol type can be RSN (for WP2) WPA (for WPA1)\nproto=WPA\n\n"
-        WPA2="#key management type can be WPA-PSK or WPA-EAP (pre shared or enterprise)\nkey_mgmt=WPA-PSK\n\n#Pairwise can be CCMP or TKIP (for WPA2 or WPA1)\npairwise=TKIP\n\n# Authorization option should be OPEN for both WPA1/WPA2 (less commonly user are SSHARED and LEAP)_\nauth_alg=OPEN\n}"
-        SSID=$(prompt_value "Enter Wifi SSID")
-        sudo echo -e $WPA1 > /home/martin/bb
-        sudo echo -e $WPA2 >> /home/martin/bb
-        #sudo echo -e $NETWORKS > /etc/network/interfaces
 }
