@@ -1,0 +1,17 @@
+#! /usr/bin/env bash
+cd `dirname $0`
+dt=10
+
+ROLL=$(cat /home/martin/pi/roll)
+SAVEDIR=/home/martin/pi/photos
+
+for (( j = 0 ; j < 9999999 ; j ++ ))
+do
+now=`date +%s`
+left=`expr ${dt} - \( ${now} % ${dt} \)`
+#expr 10 - \( 1000 % 5 \)
+sleep $left
+filename=$ROLL-$(date -u +"%d%m%Y_%H%M-%S").jpg
+echo $filename
+/opt/vc/bin/raspistill -t 2 -o $SAVEDIR/$filename
+done

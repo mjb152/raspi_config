@@ -2,13 +2,14 @@
 use strict;
 use warnings;
 
-# Changes to be made ........  wifi goes to /etc/networks   and wpa_supplicant.conf
 # script to create a new user environment for a Raspberry Pi
 my $duser = 'pi';	#default user, but it can be replaced if we like
 
-create_user(\$duser)	if (yesno("Would you like to create a replacement user for \"pi\" ?"));
-configure_wifi()	if (yesno("Would you like to configure WiFi ?"));
-install_nginx(\$duser)	if (yesno("Would you like to install nginx ?"));
+create_user(\$duser)		if (yesno("Would you like to create a replacement user for \"pi\" ?"));
+configure_wifi()		if (yesno("Would you like to configure WiFi ?"));
+install_nginx(\$duser)		if (yesno("Would you like to install nginx ?"));
+install_perlbrew(\$duser)	if (yesno("Would you like to install perlbrew ?"));
+install_pilapse(\$duser)	if (yesno("Would you like to install pilapse (timelapse camera) ?"));
 
 
 #------------here be subprocedures--------------------------
@@ -28,6 +29,22 @@ sub create_user {
 	cmd("sudo cp -r /home/pi/python_games /home/$username");
 	cmd("sudo chown -R $username:$username /home/$username");
 	cmd("sudo usermod -G $username,sudo,adm,video $username");
+}
+
+sub install_pilapse {
+	my ($duser) = @_;
+	cmd("sudo mkdir -p /home/$$duser/pilapse/photos");
+	cmd("sudo echo -e "1" > /home/$$duser/pilapse/roll");
+	cmd("sudo cp pilapse /home/$$duser/pilapse");
+}
+
+sub install_perlbrew {
+	my ($duser) = @_;
+	print "Installing perlbrew and it's environment\n";
+	cmd("sudo apt-get install perlbrew");
+	my $environ = slurp('perlbrewconfig');
+        cmd("sudo echo -e \"$environ\" >> /home/$$duser/.bashrc");
+	
 }
 
 sub install_nginx {
