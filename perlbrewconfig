@@ -1,0 +1,2 @@
+export PERLBREW_ROOT=/home/martin/perl5/perlbrew
+source ${PERLBREW_ROOT}/etc/bashrc
